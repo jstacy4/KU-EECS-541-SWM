@@ -1,0 +1,50 @@
+#include <gps.h>
+
+//struct gps_data_t my_gps_data;
+
+static struct gps_data_t gpsdata;
+
+int main()
+{
+    int ret, errno;
+    // char * hostName = "192.168.1.1";
+    char * hostName = "127.0.0.1";
+    char * hostPort = "2947";
+
+    // initializes a GPS-data structure to hold the data collected by
+    // the GPS, and sets up access to gpsd
+    if( -1 == gps_open(hostName, hostPort, &gpsdata) )
+    {
+        printf("ERROR: gps_open returned -1");
+    }
+
+    
+    (void) gps_stream(&gpsdata, WATCH_ENABLE | WATCH_JSON, NULL);
+
+    /* Put this in a loop with a call to a high resolution sleep () in it. */
+
+    while(1)
+    {
+
+        /* Used to check whether there is new data from the
+         * daemon. The second argument is the maximum amount of time
+         * to wait (in microseconds) on input before returning */
+        if( gps_waiting(&gpsdata, 500) ) 
+        {
+            if( -1 == gps_read (&gpsdata) ) 
+            {
+                printf("ERROR: gps_read returned -1");
+            } 
+            else
+            {
+                /* Display data from the GPS receiver. */
+                printf("\n%d\n\n", gpsdata.satellites_used);
+            }            
+            /* When you are done... */
+            (void) gps_stream(&gpsdata, WATCH_DISABLE, NULL);
+            (void) gps_close (&gpsdata);
+        }
+        
+        usleep(250000);
+    }
+}

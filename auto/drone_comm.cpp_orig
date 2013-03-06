@@ -1,0 +1,95 @@
+#include <stdio.h>
+#include <arpa/inet.h>
+
+#define PORT 5556
+#define IP_ADDR "192.168.1.1"
+#define SIZEOF_ARRAY(a) (sizeof(a) / sizeof(a[0]))
+
+#define SEND_COMMAND_SLEEP 250000
+
+char const TAKEOFF[] = "AT*REF=101,290718208\r";
+char const LAND[]    = "AT*REF=102,290717696\r";
+char const HOVER[]   = "AT*PCMD=201,1,0,0,0,0\r";
+
+char const GAZ_plus[] = "AT*PCMD=301,1,0,0,1036831949,0";
+char const GAZ_minus[] = "AT*PCMD=302,1,0,0,-1110651699,0";
+char const PITCH_plus[] = "AT*PCMD=303,1,1036831949,0,0,0";
+char const PITCH_minus[] = "AT*PCMD=304,1,-1110651699,0,0,0";
+char const YAW_plus[] = "AT*PCMD=305,1,0,0,0,1036831949";
+char const YAW_minus[] = "AT*PCMD=306,1,0,0,0,-1110651699";
+char const ROLL_plus[] = "AT*PCMD=307,1,0,1036831949,0,0";
+char const ROLL_minus[] = "AT*PCMD=308,1,0,-1110651699,0,0";
+
+#include "drone_comm.h"
+
+Drone_Comm::Drone_Comm() {}
+
+/*
+  Opens the command communication socket with the drone.  Assigns the
+  socket file descriptor to sock_fd.  Returns receiver_addr.
+*/
+void Drone_Comm::open_comm()
+{
+//FIXME move this
+seq_num = 300;
+
+        sock_fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+        receiver_addr.sin_family = AF_INET;
+        
+        if( 0 == inet_aton( IP_ADDR,  &receiver_addr.sin_addr ) ) 
+        {
+                printf("Crap!, Init failed\n");
+                close_comm();
+                return;
+        }
+        receiver_addr.sin_port = htons( PORT );
+}
+
+/* 
+   Close the command communication socket with the drone
+ */
+void Drone_Comm::close_comm()
+{
+        close(sock_fd);
+}
+
+void Drone_Comm::send_comm(char * message)
+{
+        sendto(sock_fd, message, SIZEOF_ARRAY(message), 0, (struct sockaddr*)&receiver_addr, sizeof(receiver_addr));
+}
+
+void Drone_Comm::takeoff()
+{
+        sendto(sock_fd, TAKEOFF, SIZEOF_ARRAY(TAKEOFF), 0, (struct sockaddr*)&receiver_addr,sizeof(receiver_addr));
+}
+
+void Drone_Comm::land()
+{
+        sendto(sock_fd, LAND, SIZEOF_ARRAY(LAND), 0,(struct sockaddr*)&receiver_addr,sizeof(receiver_addr));
+}
+
+void Drone_Comm::hover()
+{
+        sendto(sock_fd, HOVER, SIZEOF_ARRAY(HOVER), 0,(struct sockaddr*)&receiver_addr,sizeof(receiver_addr));
+}
+
+void Drone_Comm::rotate_cw()
+{
+int angle = 1056964608;
+snprintf(cmd_buf, MAX_CMD_LEN, "AT*PCMD=%d,1,0,0,0,%d\r", seq_num++, angle);
+
+        sendto(sock_fd, cmd_buf, SIZEOF_ARRAY(cmd_buf), 0,(struct sockaddr*)&receiver_addr,sizeof(receiver_addr));
+
+        // sendto(sock_fd, YAW_plus, SIZEOF_ARRAY(YAW_plus), 0,(struct sockaddr*)&receiver_addr,sizeof(receiver_addr));
+        usleep(SEND_COMMAND_SLEEP);
+}
+
+void Drone_Comm::roll_right()
+{
+        sendto(sock_fd, ROLL_plus, SIZEOF_ARRAY(ROLL_plus), 0,(struct sockaddr*)&receiver_addr,sizeof(receiver_addr));
+}
+
+void Drone_Comm::roll_left()
+{
+        sendto(sock_fd, ROLL_minus, SIZEOF_ARRAY(ROLL_minus), 0,(struct sockaddr*)&receiver_addr,sizeof(receiver_addr));
+}

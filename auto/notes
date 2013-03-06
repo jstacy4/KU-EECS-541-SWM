@@ -1,0 +1,15 @@
+Note : According to tests, a satisfying control of the AR.Drone 2.0 is
+reached by sending the AT-commands every 30 ms for smooth drone
+movements. To prevent the drone from considering the WIFI connection
+as lost, two consecutive commands must be sent within less than 2
+seconds.
+
+The maximum length of the total command cannot exceed 1024 characters;
+otherwise the entire command line is rejected. This limit is hard
+coded in the drone software.  Note : Incorrect AT commands should be
+ignored by the drone. Nevertheless, the client should always make sure
+it sends correctly formed UDP packets.
+
+Fuck Filezilla.  Transfer files to drone in binary mode ONLY.  Causes
+segfaults sometimes when it tries to automatically determine how to
+send the file.
