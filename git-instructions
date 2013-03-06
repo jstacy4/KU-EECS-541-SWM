@@ -1,0 +1,58 @@
+Initial setup commands
+
+$ sudo yum install git -y
+$ sudo yum install gitk -y
+$ git config --global user.name "Your Name"
+$ git config --global user.email "Your Email"
+$ git config --global credential.helper cache
+$ git config --global credential.helper 'cache --timeout=86400'
+$ git config --global core.editor "emacs -nw"
+
+$ git clone https://github.com/jstacy4/KU-EECS-541-SWM.git <directory to clone to>
+
+You now have your own copy of the git repository as well as gitk, a
+graphical tool for viewing the git repository structure.
+
+The basic workflow is to create a branch from the repository and work
+off of that branch while making incremental commits to that branch.
+Every once in a while it would be a good idea to push those changes on
+your branch to the server.  Once you feel like the branch is ready to
+merge into the master branch, you should just talk to me
+(Jonathan) and we'll figure it out.
+
+To create your branch:
+$ git checkout -b my_branch
+
+You are now on the branch 'my_branch' and all commits/pushes will be
+made to that branch unless you checkout somewhere else.
+
+Once you've made some changes/added some files you will want to add
+them to git's index
+
+To add everything in the current directory that has changes
+
+$ git add .
+
+To add a specific file
+
+$ git add <file name>
+
+Now you will want to commit these changes to your local repository
+
+$ git commit -a 
+
+At this point emacs (or whatever editor you chose to associate with
+git) will open with a commit change log file.  Add a lovely,
+descriptive and concise message detailing the changes you made at the
+top of the file.  Save and close the file.  Git will then commit the
+changes to your local repository.
+
+You'll want to occasionally push your branch to the server instead of
+just your local repository
+
+$ git push
+
+Your changes should now be added to the server.  Hooray!
+
+Git's online documentation and tutorial is pretty good so it wouldn't
+be a horrible idea to at least skim through the basic tutorial.
