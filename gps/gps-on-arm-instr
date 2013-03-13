@@ -1,0 +1,26 @@
+Should only need to move these executables/libraries or a subset of
+them for gpsd to work on the drone.
+
+Currently on drone:
+
+/usr/sbin/
+gpsdctl
+gpsd
+
+/usr/lib64/libgpsd*
+/usr/lib64/libgps*
+
+Maybe put on drone?:
+
+/usr/bin/
+gpsfake
+gpsctl
+gpsprof
+gpsmon
+
+/usr/lib/udev/gpsd.hotplug
+
+/usr/lib/systemd/system/gpsd.service
+
+
+

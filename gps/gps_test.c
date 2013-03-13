@@ -1,7 +1,5 @@
 #include <gps.h>
 
-//struct gps_data_t my_gps_data;
-
 static struct gps_data_t gpsdata;
 
 int main()
@@ -20,6 +18,13 @@ int main()
     gps_stream(&gpsdata, WATCH_ENABLE | WATCH_JSON, NULL);
 
     /* Put this in a loop with a call to a high resolution sleep () in it. */
+
+
+    // Freezes after first 3 'fixes' on drone...
+    // Print out debug information
+
+    // Try removing libraries/bin/sbin files that aren't on drone from
+    // pc and try gps_test on laptop again.
 
     while(1)
     {
@@ -42,11 +47,11 @@ int main()
 
                 printf("Time:%f, Error:%f\n", gpsdata.fix.time, gpsdata.fix.ept);
                 printf("Latitude:%f, Error:%f\n", gpsdata.fix.latitude, gpsdata.fix.epy);
-                printf("Longitude%f, Error:%f\n", gpsdata.fix.longitude, gpsdata.fix.epx);
-                printf("Altitude%f, Error:%f\n", gpsdata.fix.altitude, gpsdata.fix.epv);
-                printf("Track%f, Error:%f\n", gpsdata.fix.track, gpsdata.fix.epd);
-                printf("Speed%f, Error:%f\n", gpsdata.fix.speed, gpsdata.fix.eps);
-                printf("Climb%f, Error:%f\n", gpsdata.fix.climb, gpsdata.fix.epc);
+                printf("Longitude:%f, Error:%f\n", gpsdata.fix.longitude, gpsdata.fix.epx);
+                printf("Altitude:%f, Error:%f\n", gpsdata.fix.altitude, gpsdata.fix.epv);
+                printf("Track:%f, Error:%f\n", gpsdata.fix.track, gpsdata.fix.epd);
+                printf("Speed:%f, Error:%f\n", gpsdata.fix.speed, gpsdata.fix.eps);
+                printf("Climb:%f, Error:%f\n", gpsdata.fix.climb, gpsdata.fix.epc);
             }     
         }
         

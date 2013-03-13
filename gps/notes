@@ -1,0 +1,16 @@
+Fresh run
+$ sudo killall gpsd
+$ sudo rm /var/run/gpsd.sock
+
+Download gpsd 3.8 source
+Build the source
+$ scons
+
+To get GPS data from the drone:
+$ sudo ./gpsd -N -D3 -F /var/run/gpsd.sock /dev/ttyUSB0
+$ ./gps_test
+
+It would seem you can't change the name of the directory in which gpsd
+was built in without it losing track of the libraries.  Not sure how
+this'll work out when moving stuff over to the drone.  Probably have
+to put stuff into /usr/lib. - Worked on laptop.

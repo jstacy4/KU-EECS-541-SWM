@@ -1,0 +1,6 @@
+libgpsmm = False
+libQgpsmm = False
+python = False
+prefix = '/work/buildroot/output/staging/usr/'
+target = 'arm-none-linux-gnueabi'
+sysroot = '/usr/local/codesourcery/arm-2009q3/arm-none-linux-gnueabi/libc'
