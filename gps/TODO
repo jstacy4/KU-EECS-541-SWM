@@ -1,0 +1,5 @@
+Get gpsd working on drone - should be just copying over bin/lib files
+and running gpsd with the appropriate commands as listed in notes.
+
+Write instructions for how to get gpsd on drone and running from
+scratch.
