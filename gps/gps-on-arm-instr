@@ -8,15 +8,9 @@ Copied:
 ---------------------------------
 /usr/bin/gpsd
 
-/usr/lib/libgps.so
-        /libgps.so.20
-        /libgps.so.20.0
-        /libgps.so.20.0.0
+/usr/lib/libgps.so*
 
-/usr/lib/libgpsd.so
-        /libgpsd.so.20
-        /libgpsd.so.20.0
-        /libgpsd.so.20.0.0
+/usr/lib/libgpsd.so*
 
 /usr/sbin/gpsdctl -- ? Not sure this is necessary FIXME
 
@@ -24,6 +18,20 @@ Installed:
 ---------------------------------
 insmod pl2303.ko
        usbserial.ko
+
+Assumptions
+#################################
+
+These instructions were written using Fedora 17/18.  No guarantee is
+made for older versions of Fedora or other Linux variants
+
+Package Requirements
+#################################
+
+The following instructions assume you have wget, scons, gcc,
+python-devel, and glibc.i686 installed.  If you do not have them install
+use the following command to install all of them
+$ sudo yum install wget scons gcc python-devel glibc.i686 -y
 
 Setting up the ARM cross compile toolchain
 #################################
@@ -34,12 +42,15 @@ http://taghof.github.com/Navigation-for-Robots-with-WIFI-and-CV/blog/2012/01/13/
 Download the setup file codesetup.sh from: http://taghof.github.com/Navigation-for-Robots-with-WIFI-and-CV/downloads/codesetup.sh
 
 From the directory containing codesetup.sh
-$ sh codesetup.sh
+$ sudo sh codesetup.sh
 
 The toolchain has now been installed.  To enter the cross compile environment
 $ codesourcery-arm-2009q3.sh
 
 I recommend making a bash alias for the above command
+
+To exist the cross compile environment
+$ exit
         
 Generating the gpsd binaries and libraries
 ################################# 
@@ -59,6 +70,9 @@ directory as .scons-option-cache
 Make sure you are in the cross compile environment and build the gpsd
 binaries and libraries
 $ scons
+
+If you need to clean the gpsd directory use
+$ scons -c
 
 Copy the newly generated binaries and libraries listed above from the
 gpsd directory to the drone directories given above
@@ -94,6 +108,9 @@ $ insmod pl2303.ko
 
 Building gps_test
 #################################
+
+Edit 'Makefile' in the gps directory so that the macro DIR points to
+your local gpsd directory
 
 From the gps directory of the git repository, make sure you are in the
 cross compile environment
