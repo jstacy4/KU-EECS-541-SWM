@@ -14,30 +14,20 @@ int main()
         printf("ERROR: gps_open returned -1");
     }
 
-    
     gps_stream(&gpsdata, WATCH_ENABLE | WATCH_JSON, NULL);
 
     /* Put this in a loop with a call to a high resolution sleep () in it. */
-
-
-    // Freezes after first 3 'fixes' on drone...
-    // Print out debug information
-
-    // Try removing libraries/bin/sbin files that aren't on drone from
-    // pc and try gps_test on laptop again.
-
     while(1)
     {
-
         /* Used to check whether there is new data from the
          * daemon. The second argument is the maximum amount of time
          * to wait (in microseconds) on input before returning */
-        if( gps_waiting(&gpsdata, 500) ) 
+        if( gps_waiting(&gpsdata, 500) )
         {
-            if( -1 == gps_read (&gpsdata) ) 
+            if( -1 == gps_read (&gpsdata) )
             {
                 printf("ERROR: gps_read returned -1");
-            } 
+            }
             else
             {
                 /* Display data from the GPS receiver. */
@@ -52,7 +42,7 @@ int main()
                 printf("Track:%f, Error:%f\n", gpsdata.fix.track, gpsdata.fix.epd);
                 printf("Speed:%f, Error:%f\n", gpsdata.fix.speed, gpsdata.fix.eps);
                 printf("Climb:%f, Error:%f\n", gpsdata.fix.climb, gpsdata.fix.epc);
-            }     
+            }
         }
         
         usleep(250000);

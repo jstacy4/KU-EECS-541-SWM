@@ -1,26 +1,117 @@
-Should only need to move these executables/libraries or a subset of
-them for gpsd to work on the drone.
+Overview
+#################################
 
-Currently on drone:
+The following need to be copied/installed to the drone in order to
+interact with the gps receiver.
 
-/usr/sbin/
-gpsdctl
-gpsd
+Copied:
+---------------------------------
+/usr/bin/gpsd
 
-/usr/lib64/libgpsd*
-/usr/lib64/libgps*
+/usr/lib/libgps.so
+        /libgps.so.20
+        /libgps.so.20.0
+        /libgps.so.20.0.0
 
-Maybe put on drone?:
+/usr/lib/libgpsd.so
+        /libgpsd.so.20
+        /libgpsd.so.20.0
+        /libgpsd.so.20.0.0
 
-/usr/bin/
-gpsfake
-gpsctl
-gpsprof
-gpsmon
+/usr/sbin/gpsdctl -- ? Not sure this is necessary FIXME
 
-/usr/lib/udev/gpsd.hotplug
+Installed:
+---------------------------------
+insmod pl2303.ko
+       usbserial.ko
 
-/usr/lib/systemd/system/gpsd.service
+Setting up the ARM cross compile toolchain
+#################################
 
+Following the instructions found at:
+http://taghof.github.com/Navigation-for-Robots-with-WIFI-and-CV/blog/2012/01/13/Compiling-Code-For-The-ARDrone/
 
+Download the setup file codesetup.sh from: http://taghof.github.com/Navigation-for-Robots-with-WIFI-and-CV/downloads/codesetup.sh
 
+From the directory containing codesetup.sh
+$ sh codesetup.sh
+
+The toolchain has now been installed.  To enter the cross compile environment
+$ codesourcery-arm-2009q3.sh
+
+I recommend making a bash alias for the above command
+        
+Generating the gpsd binaries and libraries
+################################# 
+
+The version of gpsd which has been tested on the drone is gpsd 3.8
+which can be downloaded at:
+http://download-mirror.savannah.gnu.org/releases/gpsd/
+
+The main page for gpsd can be found at http://catb.org/gpsd/
+
+Download, unpack, and navigate to the unpacked gpsd directory.
+
+Copy the file scons-option-cache-arm from the
+downloaded-resources/gpsd folder of this git repository to your gpsd
+directory as .scons-option-cache
+
+Make sure you are in the cross compile environment and build the gpsd
+binaries and libraries
+$ scons
+
+Copy the newly generated binaries and libraries listed above from the
+gpsd directory to the drone directories given above
+
+Generating the USB to serial kernel objects
+################################# 
+
+Following the instructions provided at:
+http://www.drone-rk.org/wiki/ARDrone#no1
+
+Download the ARDrone linux kernel source from:
+https://devzone.parrot.com/projects/list_files/oss-ardrone2
+(linux.tar.gz)
+
+Unpack and navigate to the kernel source top level directory
+
+Copy the file config from the
+downloaded-resources/ARDrone-Kernel-Source to the top level directory
+as .config
+
+Open up the top level Makefile and change EXTRAVERSION to be set to
+'.9-g0d605ac'
+
+Make sure you are in the cross compile environment
+$ make modules
+
+Copy the generated files pl2303.ko and usbserial.ko from
+drivers/usb/serial to the drone
+
+On the drone in the directory containing pl2303.ko and usbserial.ko
+$ insmod usbserial.ko
+$ insmod pl2303.ko
+
+Building gps_test
+#################################
+
+From the gps directory of the git repository, make sure you are in the
+cross compile environment
+$ make
+
+Copy gps_test to the drone
+
+Receiving GPS data on the drone
+#################################
+Start gpsd
+$ gpsd -N -D3 -F /var/run/gpsd.sock /dev/ttyUSB0 &
+
+Execute gps_test
+$ ./gps_test &
+
+Note
+#################################
+
+If you need to kill gpsd
+$ killall gpsd
+$ rm /var/run/gpsd.sock
