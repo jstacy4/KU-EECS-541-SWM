@@ -2,7 +2,8 @@ Overview
 #################################
 
 The following need to be copied/installed to the drone in order to
-interact with the gps receiver.
+interact with the gps receiver connected via the USB port near the
+battery connectors on the drone
 
 Copied:
 ---------------------------------
@@ -11,8 +12,6 @@ Copied:
 /usr/lib/libgps.so*
 
 /usr/lib/libgpsd.so*
-
-/usr/sbin/gpsdctl -- ? Not sure this is necessary FIXME
 
 Installed:
 ---------------------------------
