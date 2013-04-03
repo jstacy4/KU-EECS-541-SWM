@@ -1,3 +1,8 @@
 Battery Level Query Program
 Activate Battery Level Query Program from Android device over telnet
   http://learn-it-stuff.blogspot.com/2012/03/create-simple-java-android-telnet.html
+
+Cases for emergency stop
+  Low on battery - periodically write battery level to a file and read it in main flight loop
+  Outside of testing zone determined by gps location
+  Loss of gps data
