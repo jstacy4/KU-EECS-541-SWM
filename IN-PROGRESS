@@ -1,17 +1,13 @@
 Battery Level Query Program
 Activate Battery Level Query Program from Android device over telnet
   http://learn-it-stuff.blogspot.com/2012/03/create-simple-java-android-telnet.html
-Compiled - test on hardware
+Working example for sending single command.  Need to clean up the code.  Future version 
+which allows interactive telnet instead of only a single command would be good in the future.
 
-Update firmware:
-2.3.3 Link:
-http://durrans.com/ardrone/firmware/2.3.3/
-Put update file in /update/, then run /bin/check_version.sh (it may be /sbin/check_version.sh, something like that)
-  
+Have gps and battery level data logged to files.  Include time using format in var/log
+Fly from A to B while logging said data, make a few turns.  Use existing flight commands, not gps data.
+
 Cases for emergency stop
   Low on battery - periodically write battery level to a file and read it in main flight loop
   Outside of testing zone determined by gps location
   Loss of gps data
-
-Have gps and battery level data logged to files.  Include time using format in var/log
-Fly from A to B while logging said data, make a few turns.  Use existing flight commands, not gps data.
