@@ -15,7 +15,8 @@ public:
         void open_comm();
         void close_comm();
 
-        void send_motion_comm();
+        void send_motion_cmd();
+        void send_nav_cmd();
 
         void takeoff();
         void land();
@@ -32,13 +33,16 @@ public:
 
         void roll_right();
         void roll_left();
+
+        int query_battery();
         
 private:
         int cmd_sock_fd;
         int nav_sock_fd;
         int seq_num;
         char cmd_buf[MAX_CMD_LEN];
-        struct sockaddr_in receiver_addr;
+        struct sockaddr_in command_addr;
+        struct sockaddr_in navdata_addr;
 };
 
 #endif

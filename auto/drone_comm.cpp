@@ -1,10 +1,16 @@
 #include <stdio.h>
 #include <arpa/inet.h>
 
+#include <string.h>
+
+#include "navdata.h"
+
 // seperate processes for cmd/nav socket communications
 
 #define NAVDATA_PORT 5554
 #define COMMAND_PORT 5556
+
+#define MAX_NAVDATA 1024
 
 #define IP_ADDR "192.168.1.1"
 #define SIZEOF_ARRAY(a) (sizeof(a) / sizeof(a[0]))
@@ -23,17 +29,12 @@
 #define _n0_5  -1090519040
 #define _n1_0  -1082130432
 
-// FIXME seq numbers need to be dynamic!
-// char const TAKEOFF[] = "AT*REF=101,290718208\r";
-// char const LAND[]    = "AT*REF=500,290717696\r";
-// char const HOVER[]   = "AT*PCMD=201,1,0,0,0,0\r";
-
 #include "drone_comm.h"
 
 Drone_Comm::Drone_Comm() 
 {
         // FIXME ?Arbitrary?
-        seq_num = 100;
+        seq_num = 1;
 }
 
 /*
@@ -44,27 +45,27 @@ void Drone_Comm::open_comm()
 {
         // Navdata socket creation and initialization
         nav_sock_fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-        receiver_addr.sin_family = AF_INET;
+        navdata_addr.sin_family = AF_INET;
         
-        if( 0 == inet_aton( IP_ADDR,  &receiver_addr.sin_addr ) ) 
+        if( 0 == inet_aton( IP_ADDR,  &navdata_addr.sin_addr ) ) 
         {
                 printf("Crap!, Init failed\n");
                 close_comm();
                 return;
         }
-        receiver_addr.sin_port = htons( COMMAND_PORT );
+        navdata_addr.sin_port = htons( NAVDATA_PORT );
 
         // Command socket creation and initialization
         cmd_sock_fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-        receiver_addr.sin_family = AF_INET;
+        command_addr.sin_family = AF_INET;
         
-        if( 0 == inet_aton( IP_ADDR,  &receiver_addr.sin_addr ) ) 
+        if( 0 == inet_aton( IP_ADDR,  &command_addr.sin_addr ) ) 
         {
                 printf("Crap!, Init failed\n");
                 close_comm();
                 return;
         }
-        receiver_addr.sin_port = htons( COMMAND_PORT );
+        command_addr.sin_port = htons( COMMAND_PORT );
 }
 
 /* 
@@ -80,9 +81,15 @@ void Drone_Comm::close_comm()
   Send an AT*PCMD flight motion command over the communication socket
   to the drone
  */
-void Drone_Comm::send_motion_comm()
+void Drone_Comm::send_motion_cmd()
 {
-        sendto(cmd_sock_fd, cmd_buf, SIZEOF_ARRAY(cmd_buf), 0, (struct sockaddr*)&receiver_addr, sizeof(receiver_addr));
+        sendto(cmd_sock_fd, cmd_buf, SIZEOF_ARRAY(cmd_buf), 0, (struct sockaddr*)&command_addr, sizeof(command_addr));
+        usleep(SEND_COMMAND_SLEEP);
+}
+
+void Drone_Comm::send_nav_cmd()
+{
+        sendto(nav_sock_fd, cmd_buf, SIZEOF_ARRAY(cmd_buf), 0, (struct sockaddr*)&navdata_addr, sizeof(navdata_addr));
         usleep(SEND_COMMAND_SLEEP);
 }
 
@@ -93,13 +100,7 @@ void Drone_Comm::send_motion_comm()
 void Drone_Comm::takeoff()
 {
         snprintf(cmd_buf, MAX_CMD_LEN, "AT*REF=%d,290718208\r", seq_num++);
-        send_motion_comm();
-
-        // snprintf(cmd_buf, MAX_CMD_LEN, "AT*PCMD=%d,1,%d,0,0,0\r", seq_num++, _n0_1);
-        // send_motion_comm();
-        // char const TAKEOFF[] = "AT*REF=101,290718208\r";
-
-        // sendto(cmd_sock_fd, TAKEOFF, SIZEOF_ARRAY(TAKEOFF), 0, (struct sockaddr*)&receiver_addr,sizeof(receiver_addr));
+        send_motion_cmd();
 }
 
 /*
@@ -108,11 +109,7 @@ void Drone_Comm::takeoff()
 void Drone_Comm::land()
 {
         snprintf(cmd_buf, MAX_CMD_LEN, "AT*REF=%d,290717696\r", seq_num++);
-        send_motion_comm();
-
-        // char const LAND[]    = "AT*REF=500,290717696\r";
-
-        // sendto(cmd_sock_fd, LAND, SIZEOF_ARRAY(LAND), 0,(struct sockaddr*)&receiver_addr,sizeof(receiver_addr));
+        send_motion_cmd();
 }
 
 /*
@@ -121,11 +118,7 @@ void Drone_Comm::land()
 void Drone_Comm::hover()
 {
         snprintf(cmd_buf, MAX_CMD_LEN, "AT*PCMD=%d,1,0,0,0,0\r", seq_num++);
-        send_motion_comm();
-
-        // char const HOVER[]   = "AT*PCMD=201,1,0,0,0,0\r";
-
-        // sendto(cmd_sock_fd, HOVER, SIZEOF_ARRAY(HOVER), 0,(struct sockaddr*)&receiver_addr,sizeof(receiver_addr));
+        send_motion_cmd();
 }
 // END AT*REF Commands
 
@@ -136,59 +129,95 @@ void Drone_Comm::hover()
 void Drone_Comm::alt_gain()
 {
         snprintf(cmd_buf, MAX_CMD_LEN, "AT*PCMD=%d,1,0,0,%d,0\r", seq_num++, _0_5);
-        send_motion_comm();
+        send_motion_cmd();
 }
 
 void Drone_Comm::alt_lose()
 {
         snprintf(cmd_buf, MAX_CMD_LEN, "AT*PCMD=%d,1,0,0,%d,0\r", seq_num++, _n0_5);
-        send_motion_comm();
+        send_motion_cmd();
 }
 
 void Drone_Comm::rotate_cw()
 {
         snprintf(cmd_buf, MAX_CMD_LEN, "AT*PCMD=%d,1,0,0,0,%d\r", seq_num++, _0_5);
-        send_motion_comm();
-
-        // int angle = 1056964608;
- 
-        // snprintf(cmd_buf, MAX_CMD_LEN, "AT*PCMD=%d,1,0,0,0,%d\r", seq_num++, angle);
-        // send_motion_comm();
+        send_motion_cmd();
 }
 
 void Drone_Comm::rotate_ccw()
 {
         snprintf(cmd_buf, MAX_CMD_LEN, "AT*PCMD=%d,1,0,0,0,%d\r", seq_num++, _n0_5);
-        send_motion_comm();
+        send_motion_cmd();
 }
 
 void Drone_Comm::pitch_forward()
 {
         snprintf(cmd_buf, MAX_CMD_LEN, "AT*PCMD=%d,1,0,%d,0,0\r", seq_num++, _n0_1);
-        send_motion_comm();
-
-        // int angle = -1110651699;
- 
-        // snprintf(cmd_buf, MAX_CMD_LEN, "AT*PCMD=%d,1,0,%d,0,0\r", seq_num++, angle);
-        // send_motion_comm();
+        send_motion_cmd();
 }
 
 void Drone_Comm::pitch_backward()
 {
         snprintf(cmd_buf, MAX_CMD_LEN, "AT*PCMD=%d,1,0,%d,0,0\r", seq_num++, _0_1);
-        send_motion_comm();
+        send_motion_cmd();
 }
 
 void Drone_Comm::roll_right()
 {
         snprintf(cmd_buf, MAX_CMD_LEN, "AT*PCMD=%d,1,%d,0,0,0\r", seq_num++, _0_1);
-        send_motion_comm();
+        send_motion_cmd();
 }
 
 void Drone_Comm::roll_left()
 {
         snprintf(cmd_buf, MAX_CMD_LEN, "AT*PCMD=%d,1,%d,0,0,0\r", seq_num++, _n0_1);
-        send_motion_comm();
+        send_motion_cmd();
+}
+
+int Drone_Comm::query_battery()
+{
+    int navdata[MAX_NAVDATA];  
+    int navdata_size;
+    socklen_t socketsize;
+    navdata_t navdata_struct;
+
+    socketsize = sizeof(navdata_addr);
+
+    // start communication
+    // tap drone's port: drone starts to send navdata in bootstrap mode
+    snprintf(cmd_buf, MAX_CMD_LEN, "\x01\x00");
+    send_nav_cmd();
+
+    // stop bootstrap mode    
+    snprintf(cmd_buf, MAX_CMD_LEN, "AT*CONFIG=%d,\"general:navdata_demo\",\"TRUE\"\r", seq_num++);    
+    send_motion_cmd();
+
+    // send ack to start navdata
+    snprintf(cmd_buf, MAX_CMD_LEN, "AT*CTRL=%d,0\r",seq_num++);
+    send_motion_cmd();
+    
+    // send command to trim sensors
+    snprintf(cmd_buf, MAX_CMD_LEN, "AT*FTRIM=%d,\r",seq_num++);
+    send_motion_cmd();
+    
+    // send watchdog if no cmd_buf is sent to cmd_buf port, so as to prevent drone from entering hover mode
+    sprintf(cmd_buf, "AT*COMWDG=%d\r",seq_num++);
+    send_motion_cmd();
+
+    // tickle drone's port: drone send one packet of navdata in navdata_demo mode 
+    snprintf(cmd_buf, MAX_CMD_LEN, "\x01\x00");
+    send_nav_cmd();
+    
+    // receive data 
+    memset( navdata, '\0', sizeof(navdata)); 
+    navdata_size = recvfrom(nav_sock_fd, navdata, sizeof(navdata), 0, (struct sockaddr *)&navdata_addr, &socketsize);
+    // printf("received navdata %d bytes\n",navdata_size);
+    
+    // printf("decode navdata_struct %d bytes\n",sizeof(navdata_struct));
+    memcpy(&navdata_struct, navdata, sizeof(navdata_struct));
+    // printf("%2d%s\n", navdata_struct.navdata_option.vbat_flying_percentage, "%");
+
+    return navdata_struct.navdata_option.vbat_flying_percentage;
 }
 // END AT*PCMD flight motion Commands
 

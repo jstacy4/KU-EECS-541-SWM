@@ -6,6 +6,8 @@ which allows interactive telnet instead of only a single command would be good i
 
 Have gps and battery level data logged to files.  Include time using format in var/log
 Fly from A to B while logging said data, make a few turns.  Use existing flight commands, not gps data.
+    For this fork/exec a process for each gps and battery which will each write to a file.
+
 
 Cases for emergency stop
   Low on battery - periodically write battery level to a file and read it in main flight loop

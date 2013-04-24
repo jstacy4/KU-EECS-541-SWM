@@ -1,13 +1,13 @@
 C_FLAGS = -c
 ARM = arm-none-linux-gnueabi-gcc
-OBJS = manuevers_test.o drone_comm.o
-#OBJS = manuevers_test.o take_off_land.o drone_comm.o
+OBJS = maneuvers_test.o drone_comm.o
+#OBJS = maneuvers_test.o take_off_land.o drone_comm.o
 
-manuevers_test: $(OBJS)
-	$(ARM) -o manuevers_test $(OBJS)
+maneuvers_test: $(OBJS)
+	$(ARM) -o maneuvers_test $(OBJS)
 
-manuevers_test.o: manuevers_test.cpp
-	$(ARM) $(C_FLAGS) manuevers_test.cpp
+maneuvers_test.o: maneuvers_test.cpp
+	$(ARM) $(C_FLAGS) maneuvers_test.cpp
 
 take_off_land: $(OBJS)
 	$(ARM) -o take_off_land $(OBJS)
@@ -22,7 +22,7 @@ hello:
 	$(ARM) $(C_FLAGS) hello_world.c -o hello
 
 clean: 
-	rm -f manuevers_test take_off_land hello *~ *.o
+	rm -f maneuvers_test take_off_land hello *~ *.o
 
 .IGNORE: clean
 

@@ -71,27 +71,27 @@ int main(int argc, char *argv[])
         
     // start communication
     // tap drone's port: drone starts to send navdata in bootstrap mode
-    printf("\tnavigation data start\n");
+    // printf("\tnavigation data start\n");
     sprintf(command, "\x01\x00");
     sendCommand(sd1, command, flags, droneAddr_navdata);
     
     // stop bootstrap mode
-    printf("\tstop bootstrap mode\n"); 
+    // printf("\tstop bootstrap mode\n"); 
     sprintf(command, "AT*CONFIG=%d,\"general:navdata_demo\",\"TRUE\"\r",seq++);
     sendCommand(sd2, command, flags, droneAddr_command);
     
     // send ack to start navdata
-    printf("\tsend ack\n");
+    // printf("\tsend ack\n");
     sprintf(command, "AT*CTRL=%d,0\r",seq++);
     sendCommand(sd2, command, flags, droneAddr_command);
     
     // send command to trim sensors
-    printf("\ttrim sensors\n"); 
+    // printf("\ttrim sensors\n"); 
     sprintf(command, "AT*FTRIM=%d,\r",seq++);
     sendCommand(sd2, command, flags, droneAddr_command);
     
     // send watchdog if no command is sent to command port, so as to prevent drone from entering hover mode
-    printf("send AT*COMWDG\n");
+    // printf("send AT*COMWDG\n");
     sprintf(command, "AT*COMWDG=%d\r",seq++);
     sendCommand(sd2, command, flags, droneAddr_command);
     
@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
     //receive data 
     memset( navdata, '\0', sizeof(navdata)); 
     navdata_size = recvfrom(sd1, navdata, sizeof(navdata), 0, (struct sockaddr *)&droneAddr_navdata, &socketsize);
-    printf("received navdata %d bytes\n",navdata_size);
+    // printf("received navdata %d bytes\n",navdata_size);
     
     // printf("decode navdata_struct %d bytes\n",sizeof(navdata_struct));
     memcpy(&navdata_struct, navdata, sizeof(navdata_struct));
