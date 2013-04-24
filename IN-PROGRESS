@@ -8,6 +8,7 @@ Have gps and battery level data logged to files.  Include time using format in v
 Fly from A to B while logging said data, make a few turns.  Use existing flight commands, not gps data.
     For this fork/exec a process for each gps and battery which will each write to a file.
 
+Drone is having odd behavior on take off.  Try trimming sensors immediately after take off.
 
 Cases for emergency stop
   Low on battery - periodically write battery level to a file and read it in main flight loop
