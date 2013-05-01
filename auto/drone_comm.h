@@ -34,6 +34,7 @@ public:
         void roll_right();
         void roll_left();
 
+        void start_navdata();
         int query_battery();
         
 private:

@@ -4,7 +4,7 @@ OBJS = maneuvers_test.o drone_comm.o
 #OBJS = maneuvers_test.o take_off_land.o drone_comm.o
 
 maneuvers_test: $(OBJS)
-	$(ARM) -o maneuvers_test $(OBJS)
+	$(ARM) -o maneuvers $(OBJS)
 
 maneuvers_test.o: maneuvers_test.cpp
 	$(ARM) $(C_FLAGS) maneuvers_test.cpp
@@ -22,7 +22,7 @@ hello:
 	$(ARM) $(C_FLAGS) hello_world.c -o hello
 
 clean: 
-	rm -f maneuvers_test take_off_land hello *~ *.o
+	rm -f maneuvers take_off_land hello *~ *.o
 
 .IGNORE: clean
 

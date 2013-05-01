@@ -66,6 +66,10 @@ void Drone_Comm::open_comm()
                 return;
         }
         command_addr.sin_port = htons( COMMAND_PORT );
+
+        // send command to trim sensors
+        snprintf(cmd_buf, MAX_CMD_LEN, "AT*FTRIM=%d,\r",seq_num++);
+        send_motion_cmd();
 }
 
 /* 
@@ -174,12 +178,9 @@ void Drone_Comm::roll_left()
         send_motion_cmd();
 }
 
-int Drone_Comm::query_battery()
+void Drone_Comm::start_navdata()
 {
-    int navdata[MAX_NAVDATA];  
-    int navdata_size;
     socklen_t socketsize;
-    navdata_t navdata_struct;
 
     socketsize = sizeof(navdata_addr);
 
@@ -207,6 +208,14 @@ int Drone_Comm::query_battery()
     // tickle drone's port: drone send one packet of navdata in navdata_demo mode 
     snprintf(cmd_buf, MAX_CMD_LEN, "\x01\x00");
     send_nav_cmd();
+}
+
+int Drone_Comm::query_battery()
+{
+    int navdata[MAX_NAVDATA];  
+    int navdata_size;
+    socklen_t socketsize;
+    navdata_t navdata_struct;
     
     // receive data 
     memset( navdata, '\0', sizeof(navdata)); 
