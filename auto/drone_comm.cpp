@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <arpa/inet.h>
 
 #include <string.h>
@@ -29,11 +30,13 @@
 #define _n0_5  -1090519040
 #define _n1_0  -1082130432
 
+#define GPSD_START "gpsd -N -D0 -F ./gpsd.sock /dev/ttyUSB0 &"
+#define GPSD_STOP "killall gpsd"
+
 #include "drone_comm.h"
 
 Drone_Comm::Drone_Comm() 
 {
-        // FIXME ?Arbitrary?
         seq_num = 1;
 }
 
@@ -177,6 +180,7 @@ void Drone_Comm::roll_left()
         snprintf(cmd_buf, MAX_CMD_LEN, "AT*PCMD=%d,1,%d,0,0,0\r", seq_num++, _n0_1);
         send_motion_cmd();
 }
+// END AT*PCMD flight motion Commands
 
 void Drone_Comm::start_navdata()
 {
@@ -228,5 +232,95 @@ int Drone_Comm::query_battery()
 
     return navdata_struct.navdata_option.vbat_flying_percentage;
 }
-// END AT*PCMD flight motion Commands
 
+void Drone_Comm::print_battery_level()
+{
+    int battery_level;
+
+    do
+    {
+        battery_level = query_battery();        
+    } while( battery_level == 0 );
+
+    fflush(stdout);
+    printf("Battery Level: %d", battery_level);
+    fflush(stdout);
+}
+
+void Drone_Comm::start_gps()
+{
+    char * hostName = "127.0.0.1";
+    char * hostPort = "2947";
+
+    // Start GPSD
+    system(GPSD_START);
+
+    sleep(1);
+
+    // initializes a GPS-data structure to hold the data collected by
+    // the GPS, and sets up access to gpsd
+    if( -1 == gps_open(hostName, hostPort, &gpsdata) )
+    {
+        printf("ERROR: gps_open returned -1");
+    }
+
+    gps_stream(&gpsdata, WATCH_ENABLE | WATCH_JSON, NULL);
+
+    update_gps_data();
+
+    printf("Receiving Valid GPS Data");
+}
+
+void Drone_Comm::stop_gps()
+{
+    (void) gps_stream(&gpsdata, WATCH_DISABLE, NULL);
+    (void) gps_close (&gpsdata);
+    system(GPSD_STOP);
+}
+
+void Drone_Comm::update_gps_data()
+{
+    do 
+    {
+        /* Used to check whether there is new data from the
+         * daemon. The second argument is the maximum amount of time
+         * to wait (in microseconds) on input before returning */
+        if( gps_waiting(&gpsdata, 500) )
+        {
+            if( -1 == gps_read (&gpsdata) )
+            {
+                printf("ERROR: gps_read returned -1");
+            }
+        }
+    } while( gpsdata.satellites_used == 0 );
+}
+
+void Drone_Comm::print_gps_data()
+{
+    update_gps_data();
+    
+    rawtime = static_cast<time_t>(gpsdata.fix.time);
+    timeinfo = localtime(&rawtime);
+
+    hour = timeinfo->tm_hour;
+
+    if( hour < 5 )
+    {
+        hour += 19;
+    }
+    else
+    {
+        hour -= 5;
+    }
+    
+    fflush(stdout);
+    printf("\nSatellites Used:%d\n", gpsdata.satellites_used);
+    printf("Unix Time:%f\n", gpsdata.fix.time);
+    printf("Time (HH:MM:SS):%d:%d:%d\n", hour, 
+                                         timeinfo->tm_min,
+                                         timeinfo->tm_sec);
+    printf("Latitude:%f, Error:%f\n", gpsdata.fix.latitude, gpsdata.fix.epy);
+    printf("Longitude:%f, Error:%f\n", gpsdata.fix.longitude, gpsdata.fix.epx);
+    printf("Altitude:%f, Error:%f\n", gpsdata.fix.altitude, gpsdata.fix.epv);
+    fflush(stdout);
+}

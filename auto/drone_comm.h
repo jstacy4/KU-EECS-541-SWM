@@ -3,6 +3,8 @@
 
 #include <netinet/in.h>
 #include <unistd.h>
+#include <gps.h>
+#include <time.h>
 
 //FIXME change this?
 #define MAX_CMD_LEN 150
@@ -17,6 +19,9 @@ public:
 
         void send_motion_cmd();
         void send_nav_cmd();
+
+        void start_gps();
+        void stop_gps();
 
         void takeoff();
         void land();
@@ -36,6 +41,12 @@ public:
 
         void start_navdata();
         int query_battery();
+        void print_battery_level();
+
+        void update_gps_data();
+        void print_gps_data();
+
+        struct gps_data_t gpsdata;
         
 private:
         int cmd_sock_fd;
@@ -44,6 +55,10 @@ private:
         char cmd_buf[MAX_CMD_LEN];
         struct sockaddr_in command_addr;
         struct sockaddr_in navdata_addr;
+
+        time_t rawtime;
+        struct tm * timeinfo;
+        int hour;
 };
 
 #endif
